@@ -1,0 +1,31 @@
+# updates elgato streamdeck screensaver with random .webp file from subfolder webp
+import os
+import random
+import shutil
+
+def replace_webp_file(target_dir, source_dir):
+    # Find the first webp file in the target directory
+    target_files = [f for f in os.listdir(target_dir) if f.endswith('.webp')]
+    if not target_files:
+        print("No .webp files found in the target directory.")
+        return
+    
+    target_file = target_files[0]
+    target_file_path = os.path.join(target_dir, target_file)
+
+    # List all webp files in the source directory
+    source_files = [f for f in os.listdir(source_dir) if f.endswith('.webp')]
+    if not source_files:
+        print("No .webp files found in the source directory.")
+        return
+
+    # Select a random webp file from the source directory
+    random_file = random.choice(source_files)
+    random_file_path = os.path.join(source_dir, random_file)
+
+    # Replace the target file with the randomly selected file
+    shutil.copy2(random_file_path, target_file_path)
+    print(f"Replaced {target_file_path} with {random_file_path}")
+
+# Example usage:
+replace_webp_file('C:\\Users\\USERNAME\\AppData\\Roaming\\Elgato\\StreamDeck\\Assets', '.\\webp')
