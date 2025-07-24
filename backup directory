@@ -1,0 +1,76 @@
+backup.bat:
+
+@echo off
+setlocal enabledelayedexpansion
+
+:: Get current date and time in YYYY-MM-DD_HH-MM-SS format
+for /f "tokens=2 delims==" %%a in ('wmic OS Get localdatetime /value') do set "dt=%%a"
+set "YY=%dt:~0,4%" & set "MM=%dt:~4,2%" & set "DD=%dt:~6,2%"
+set "HH=%dt:~8,2%" & set "Min=%dt:~10,2%" & set "SS=%dt:~12,2%"
+set "datetime=%YY%-%MM%-%DD%_%HH%-%Min%-%SS%"
+
+:: Create archive directory if it doesn't exist
+if not exist "archive" mkdir "archive"
+
+:: Create timestamped subdirectory
+set "target_dir=archive\%datetime%"
+mkdir "%target_dir%"
+
+echo Moving files and folders to %target_dir%...
+echo.
+
+:: Get the name of this script file
+set "script_name=%~nx0"
+
+:: Move all files and folders except the archive directory and this script
+for /f "delims=" %%i in ('dir /b /a-d 2^>nul') do (
+    if /i not "%%i"=="archive" (
+        if /i not "%%i"=="%script_name%" (
+            echo Moving file: %%i
+            move "%%i" "%target_dir%\" >nul 2>&1
+            if errorlevel 1 (
+                echo WARNING: Failed to move %%i
+            )
+        ) else (
+            echo Skipping script file: %%i
+        )
+    )
+)
+
+:: Move all directories except archive
+for /f "delims=" %%i in ('dir /b /ad 2^>nul') do (
+    if /i not "%%i"=="archive" (
+        echo Moving folder: %%i
+        move "%%i" "%target_dir%\" >nul 2>&1
+        if errorlevel 1 (
+            echo WARNING: Failed to move %%i
+        )
+    )
+)
+
+echo.
+echo Archive operation completed.
+echo Files and folders moved to: %target_dir%
+pause
+
+
+
+================
+
+add_to_context_menu.reg:
+
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\ArchiveFiles]
+@="Archive Files"
+"Icon"="shell32.dll,4"
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\ArchiveFiles\command]
+@="\"C:\\Users\\USER\\PATH\\TO\\FILE\\backup.bat\""
+
+
+
+
+
+
+
